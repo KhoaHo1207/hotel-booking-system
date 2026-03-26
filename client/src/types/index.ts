@@ -34,3 +34,12 @@ export type Room = {
   updatedAt?: string;
   __v?: number;
 };
+
+export type ExclusiveOffer = {
+  _id: number;
+  title: string;
+  description: string;
+  priceOff: number;
+  expiryDate: string;
+  image: string;
+};

@@ -2,7 +2,7 @@ interface Props {
   title: string;
   subTitle: string;
   align?: string;
-  font: string;
+  font?: string;
 }
 
 export default function Title({
