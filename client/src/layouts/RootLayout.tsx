@@ -3,9 +3,11 @@ import Footer from "../components/Footer";
 
 export default function RootLayout() {
   return (
-    <div className="min-h-[70vh]">
-      <Outlet />
+    <>
+      <div className="min-h-[calc(100vh-10rem)]">
+        <Outlet />
+      </div>
       <Footer />
-    </div>
+    </>
   );
 }
