@@ -43,3 +43,12 @@ export type ExclusiveOffer = {
   expiryDate: string;
   image: string;
 };
+
+export type Testimonial = {
+  id: number;
+  name: string;
+  address: string;
+  image: string;
+  rating: number;
+  review: string;
+};
