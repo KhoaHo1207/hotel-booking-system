@@ -75,3 +75,9 @@ export type Booking = {
   updatedAt: string;
   __v: number;
 };
+
+export type DashboardData = {
+  totalBookings: number;
+  totalRevenue: number;
+  bookings: Booking[] | null;
+};

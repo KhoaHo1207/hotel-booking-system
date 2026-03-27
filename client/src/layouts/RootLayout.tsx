@@ -5,7 +5,7 @@ import HotelReg from "../components/HotelReg";
 export default function RootLayout() {
   return (
     <>
-      <HotelReg />
+      {false && <HotelReg />}
       <div className="min-h-[calc(100vh-10rem)]">
         <Outlet />
       </div>
