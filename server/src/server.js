@@ -3,7 +3,6 @@ import cors from "cors";
 import { ENV } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import connectDB from "./database/connectDB.js";
-import { errorMiddleware } from "./middlewares/errorMiddlware.js";
 import initRoutes from "./routes/index.route.js";
 const app = express();
 
@@ -22,8 +21,6 @@ app.use(
   })
 );
 app.use(cookieParser());
-
-app.use(errorMiddleware);
 
 connectDB();
 

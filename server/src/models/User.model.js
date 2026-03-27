@@ -14,13 +14,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [8, "Password must be at least 8 characters long"],
     },
-    fullName: {
+    username: {
       type: String,
       required: [true, "Full name is required"],
       trim: true,
       minlength: [3, "Full name must be at least 3 characters long"],
     },
-    avatar: {
+    image: {
       type: String,
       default: "",
     },
@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
     isBlocked: {
       type: Boolean,
       default: false,
+    },
+    recentSearchedCities: {
+      type: [String],
+      default: [],
     },
   },
   {
