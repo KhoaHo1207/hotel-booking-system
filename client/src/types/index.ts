@@ -52,3 +52,9 @@ export type Testimonial = {
   rating: number;
   review: string;
 };
+
+export type RoomCommon = {
+  icon: string;
+  title: string;
+  description: string;
+};

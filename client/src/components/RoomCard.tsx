@@ -1,13 +1,12 @@
 import { assets, facilityIcons } from "../assets/assets";
 import type { Room } from "../types";
+import { getRandomRating } from "../utils/helper";
 import StarRating from "./StarRating";
 
 interface Props {
   room: Room;
   onClick: () => void;
 }
-
-const ratings = Math.floor(Math.random() * 5) + 1;
 
 export default function RoomCard({ room, onClick }: Props) {
   return (
@@ -28,7 +27,7 @@ export default function RoomCard({ room, onClick }: Props) {
           {room.hotel.name}
         </p>
         <div className="flex items-center">
-          <StarRating rating={ratings} />
+          <StarRating rating={getRandomRating()} />
           <p className="ml-2">200+ reviews</p>
         </div>
         <div className="flex items-center gap-1 text-gray-500 mt-2 text-sm ">
