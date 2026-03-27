@@ -58,3 +58,20 @@ export type RoomCommon = {
   title: string;
   description: string;
 };
+
+export type Booking = {
+  _id: string;
+  user: User;
+  room: Room;
+  hotel: Hotel;
+  checkInDate: string;
+  checkOutDate: string;
+  totalPrice: number;
+  guests: number;
+  status: string;
+  paymentMethod: string;
+  isPaid: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};

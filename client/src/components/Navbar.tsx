@@ -42,23 +42,20 @@ export default function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
     const handleScroll = () => {
       if (location.pathname !== "/") {
         setIsScrolled(true);
       } else {
-        setIsScrolled(el.scrollTop > 10);
+        setIsScrolled(window.scrollY > 10);
       }
     };
 
     handleScroll();
 
-    el.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      el.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [location.pathname]);
 
