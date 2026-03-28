@@ -10,11 +10,10 @@ import { isAuthenticated } from "../middlewares/checkAuth.js";
 
 const router = express.Router();
 
-router.use(isAuthenticated);
-router.post("/", createHotel);
+router.post("/", isAuthenticated, createHotel);
 router.get("/", getHotels);
 router.get("/:id", getHotel);
-router.delete("/:id", deleteHotel);
-router.patch("/:id", updateHotel);
+router.delete("/:id", isAuthenticated, deleteHotel);
+router.patch("/:id", isAuthenticated, updateHotel);
 
 export default router;

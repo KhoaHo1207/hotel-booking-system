@@ -18,12 +18,14 @@ const hotelSchema = new mongoose.Schema(
       type: String,
       required: [true, "Hotel contact is required"],
       trim: true,
-      length: [10, "Hotel contact must be exactly 10 characters long"],
+      minlength: [10, "Hotel contact must be 10 characters long"],
+      maxlength: [10, "Hotel contact must be 10 characters long"],
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Hotel owner is required"],
+      unique: true,
     },
     city: {
       type: String,

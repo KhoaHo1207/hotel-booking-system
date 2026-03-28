@@ -1,11 +1,13 @@
 import Hotel from "../models/Hotel.model.js";
 import User from "../models/User.model.js";
-
+import Room from "../models/Room.model.js";
+import xss from "xss";
 export const createHotel = async (req, res) => {
   try {
-    const { name, address, contact, city, owner } = req.body;
+    const owner = req.user._id;
+    const { name, address, contact, city } = req.body;
 
-    if (!name || !address || !contact || !city || !owner) {
+    if (!name || !address || !contact || !city) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -40,19 +42,12 @@ export const createHotel = async (req, res) => {
       });
     }
 
-    if (!owner) {
+    const hotel = await Hotel.findOne({ owner });
+
+    if (hotel) {
       return res.status(400).json({
         success: false,
-        message: "Hotel owner is required",
-      });
-    }
-
-    const ownerUser = await User.findById(owner);
-
-    if (!ownerUser) {
-      return res.status(404).json({
-        success: false,
-        message: "Hotel owner not found",
+        message: "You already have a hotel",
       });
     }
 
@@ -64,9 +59,11 @@ export const createHotel = async (req, res) => {
       city: city.trim(),
     });
 
+    await User.findByIdAndUpdate(owner, { role: "hotelOwner" }, { new: true });
+
     return res.status(201).json({
       success: true,
-      message: "Hotel created successfully",
+      message: "Registered as hotel owner successfully",
     });
   } catch (error) {
     console.log(error || "Internal Server Error");
@@ -79,17 +76,35 @@ export const createHotel = async (req, res) => {
 
 export const getHotels = async (req, res) => {
   try {
-    const hotels = await Hotel.find().populate("owner", "-password");
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const [hotels, total] = await Promise.all([
+      Hotel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).populate({
+        path: "owner",
+        select: "-password",
+      }),
+      Hotel.countDocuments(),
+    ]);
 
     return res.status(200).json({
       success: true,
       message: "Hotels fetched successfully",
-      results: {
-        hotels,
+      data: hotels,
+      meta: {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     });
   } catch (error) {
-    console.log(error || "Internal Server Error");
+    console.log(error);
+
     return res.status(500).json({
       success: false,
       message: error.message || "Internal Server Error",
@@ -135,41 +150,73 @@ export const getHotel = async (req, res) => {
 };
 
 export const deleteHotel = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
+    const owner = req.user._id;
     const { id } = req.params;
 
     if (!id) {
+      await session.abortTransaction();
       return res.status(400).json({
         success: false,
         message: "Hotel ID is required",
       });
     }
 
-    const hotel = await Hotel.findByIdAndDelete(id);
+    const hotel = await Hotel.findById(id).session(session);
 
     if (!hotel) {
+      await session.abortTransaction();
       return res.status(404).json({
         success: false,
-        message: "Hotel not found",
+        message: "Hotel not found or unauthorized",
       });
     }
 
-    return req.status(200).json({
+    if (!hotel.owner.equals(owner)) {
+      await session.abortTransaction();
+      return res.status(403).json({
+        success: false,
+        message: "Hotel not found or unauthorized",
+      });
+    }
+
+    await hotel.deleteOne({ session });
+
+    await User.findByIdAndUpdate(
+      owner,
+      { role: "user" },
+      { new: true, session }
+    );
+
+    await Room.deleteMany({ hotel: id }).session(session);
+
+    await session.commitTransaction();
+
+    return res.status(200).json({
       success: true,
       message: "Hotel deleted successfully",
     });
   } catch (error) {
-    console.log(error || "Internal Server Error");
+    await session.abortTransaction();
+    console.log(error);
+
     return res.status(500).json({
       success: false,
       message: error.message || "Internal Server Error",
     });
+  } finally {
+    session.endSession();
   }
 };
 
 export const updateHotel = async (req, res) => {
   try {
+    const owner = req.user._id;
     const { id } = req.params;
+
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -178,16 +225,30 @@ export const updateHotel = async (req, res) => {
     }
 
     const allowedFields = ["name", "address", "contact", "city"];
-
     const updates = {};
 
-    for (let key of allowedFields) {
-      if (req.body[key] !== undefined) {
-        updates[key] = req.body[key];
+    for (const key of allowedFields) {
+      const value = req.body[key];
+
+      if (value === undefined) continue;
+
+      if (typeof value === "string") {
+        const cleaned = xss(value.trim());
+
+        if (cleaned.length > 0) {
+          updates[key] = cleaned;
+        }
       }
     }
 
-    const hotel = await Hotel.findByIdAndUpdate(id, updates, {
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields to update",
+      });
+    }
+
+    const hotel = await Hotel.findOneAndUpdate({ _id: id, owner }, updates, {
       new: true,
       runValidators: true,
     });
@@ -195,7 +256,7 @@ export const updateHotel = async (req, res) => {
     if (!hotel) {
       return res.status(404).json({
         success: false,
-        message: "Hotel not found",
+        message: "Hotel not found or unauthorized",
       });
     }
 
@@ -205,7 +266,7 @@ export const updateHotel = async (req, res) => {
       data: hotel,
     });
   } catch (error) {
-    console.log(error || "Internal Server Error");
+    console.log(error);
 
     return res.status(500).json({
       success: false,

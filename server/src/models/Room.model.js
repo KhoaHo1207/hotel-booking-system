@@ -6,6 +6,7 @@ const roomSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hotel",
       required: [true, "Hotel is required"],
+      index: true,
     },
     roomType: {
       type: String,
@@ -19,8 +20,6 @@ const roomSchema = new mongoose.Schema(
     },
     amenities: {
       type: [String],
-      required: [true, "Amenities are required"],
-      trim: true,
     },
     images: [
       {

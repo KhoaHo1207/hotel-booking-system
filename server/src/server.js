@@ -4,6 +4,11 @@ import { ENV } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import connectDB from "./database/connectDB.js";
 import initRoutes from "./routes/index.route.js";
+import connectCloudinary from "./config/cloudinray.js";
+
+connectDB();
+connectCloudinary();
+
 const app = express();
 
 app.use(express.json());
@@ -21,8 +26,6 @@ app.use(
   })
 );
 app.use(cookieParser());
-
-connectDB();
 
 initRoutes(app);
 

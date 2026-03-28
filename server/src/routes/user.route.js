@@ -1,8 +1,19 @@
 import express from "express";
-import { getUsers } from "../controllers/user.controller.js";
-
+import {
+  getProfile,
+  getUsers,
+  storeRecentSearchedCities,
+  getRecentSearchedCities,
+} from "../controllers/user.controller.js";
+import { isAuthenticated } from "../middlewares/checkAuth.js";
 const router = express.Router();
 
 router.get("/all", getUsers);
-
+router.get("/profile", isAuthenticated, getProfile);
+router.post(
+  "/store-recent-searched-cities",
+  isAuthenticated,
+  storeRecentSearchedCities
+);
+router.get("/recent-searched-cities", isAuthenticated, getRecentSearchedCities);
 export default router;

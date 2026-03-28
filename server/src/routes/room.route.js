@@ -6,14 +6,20 @@ import {
   getRoom,
   deleteRoom,
   updateRoom,
+  toggleRoomAvailability,
 } from "../controllers/room.controller.js";
+import upload from "../middlewares/upload.js";
 const router = express.Router();
 
-router.use(isAuthenticated);
-router.post("/", createRoom);
+router.post("/", upload.array("images", 4), isAuthenticated, createRoom);
 router.get("/", getRooms);
 router.get("/:id", getRoom);
-router.delete("/:id", deleteRoom);
-router.patch("/:id", updateRoom);
+router.delete("/:id", isAuthenticated, deleteRoom);
+router.patch("/:id", isAuthenticated, updateRoom);
+router.patch(
+  "/:id/toggle-availability",
+  isAuthenticated,
+  toggleRoomAvailability
+);
 
 export default router;
