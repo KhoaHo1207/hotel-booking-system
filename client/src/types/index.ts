@@ -81,3 +81,14 @@ export type DashboardData = {
   totalRevenue: number;
   bookings: Booking[] | null;
 };
+
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type APIResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
