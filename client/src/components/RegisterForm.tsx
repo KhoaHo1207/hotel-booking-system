@@ -2,6 +2,9 @@ import { useCallback, useState } from "react";
 import type { FormEvent } from "react";
 import { assets } from "../assets/assets.ts";
 import type { RegisterPayload } from "../types/index.ts";
+import { Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store/store.ts";
 
 type RegisterFormProps = {
   onSubmit?: (values: RegisterPayload) => void;
@@ -14,16 +17,19 @@ export default function RegisterForm({
   className,
   onSwitchToLogin,
 }: RegisterFormProps) {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setformData] = useState<RegisterPayload>({
+    email: "",
+    password: "",
+    username: "",
+  });
 
+  const { isAuthLoading } = useSelector((state: RootState) => state.user);
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      onSubmit?.({ username, email, password });
+      onSubmit?.(formData);
     },
-    [username, email, password, onSubmit]
+    [formData, onSubmit]
   );
 
   return (
@@ -37,24 +43,25 @@ export default function RegisterForm({
           QuickStay
         </p>
         <h2 className="text-3xl font-semibold text-slate-900">
-          Tạo tài khoản mới
+          Create an account
         </h2>
         <p className="text-base text-slate-500">
-          Đăng ký để tận hưởng trải nghiệm đặt phòng nhanh chóng và các ưu đãi
-          dành riêng cho bạn.
+          Register to enjoy fast booking experience and exclusive offers.
         </p>
       </div>
 
       <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit}>
         <label className="flex flex-col gap-2 text-sm text-slate-600">
-          Họ tên
+          Username
           <input
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-400 focus:outline-none"
             type="text"
             required
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="Họ và tên"
+            value={formData.username}
+            onChange={(event) =>
+              setformData({ ...formData, username: event.target.value })
+            }
+            placeholder="Enter your username"
           />
         </label>
 
@@ -64,35 +71,49 @@ export default function RegisterForm({
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-400 focus:outline-none"
             type="email"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            value={formData.email}
+            onChange={(event) =>
+              setformData({ ...formData, email: event.target.value })
+            }
             placeholder="you@example.com"
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm text-slate-600">
-          Mật khẩu
+          Password
           <input
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-400 focus:outline-none"
             type="password"
             required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Nhập mật khẩu"
+            value={formData.password}
+            onChange={(event) =>
+              setformData({ ...formData, password: event.target.value })
+            }
+            placeholder="Enter your password"
           />
         </label>
 
         <button
           type="submit"
-          className="rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-slate-800"
+          className={`${
+            isAuthLoading ? "cursor-not-allowed" : "cursor-pointer"
+          } rounded-2xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-slate-800`}
+          disabled={isAuthLoading}
         >
-          Đăng ký
+          {isAuthLoading ? (
+            <p className="flex items-center justify-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Registering...</span>
+            </p>
+          ) : (
+            <p>Register</p>
+          )}
         </button>
       </form>
 
       <div className="mt-8 flex items-center justify-between text-sm text-slate-500">
         <span className="flex-1 border-t border-slate-200" />
-        <span className="px-3">hoặc đăng ký với</span>
+        <span className="px-3">or register with</span>
         <span className="flex-1 border-t border-slate-200" />
       </div>
 
@@ -119,13 +140,13 @@ export default function RegisterForm({
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        Đã có tài khoản?{" "}
+        Already have an account?{" "}
         <button
           type="button"
-          className="font-semibold text-slate-900"
+          className="font-semibold text-slate-900 cursor-pointer hover:underline"
           onClick={onSwitchToLogin}
         >
-          Đăng nhập ngay
+          Login now
         </button>
       </p>
     </div>

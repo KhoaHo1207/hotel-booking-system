@@ -42,7 +42,7 @@ export const login = createAsyncThunk(
       const err = error as AxiosError<{ message: string }>;
 
       console.log(err.response?.data.message);
-
+      toast.error(err.response?.data.message || "Login failed");
       return rejectWithValue(
         err.response?.data.message || "An error occurred while logging in"
       );

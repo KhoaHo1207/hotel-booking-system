@@ -1,24 +1,21 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, Route, Routes } from "react-router-dom";
+import OwnerLayout from "./layouts/OwnerLayout";
 import RootLayout from "./layouts/RootLayout";
 import AllRooms from "./pages/AllRooms";
 import Home from "./pages/Home";
-import RoomDetail from "./pages/RoomDetail";
-import MyBookings from "./pages/MyBookings";
-import OwnerLayout from "./layouts/OwnerLayout";
+import AddRoom from "./pages/hotelOwner/AddRoom";
 import Dashboard from "./pages/hotelOwner/Dashboard";
 import ListRoom from "./pages/hotelOwner/ListRoom";
-import AddRoom from "./pages/hotelOwner/AddRoom";
 import LoginPage from "./pages/Login";
+import MyBookings from "./pages/MyBookings";
 import RegisterPage from "./pages/Register";
-import { useDispatch, useSelector } from "react-redux";
+import RoomDetail from "./pages/RoomDetail";
 import { getProfile } from "./store/slices/userSlice";
-import type { RootState, AppDispatch } from "./store/store";
-import { useEffect } from "react";
+import type { AppDispatch, RootState } from "./store/store";
 
 function App() {
-  const isOwnerPath = useLocation().pathname.includes("owner");
-
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -30,7 +27,6 @@ function App() {
 
   return (
     <>
-      {!isOwnerPath && <Navbar />}
       <Routes>
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
