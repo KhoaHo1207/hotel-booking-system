@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets.ts";
-import { logout } from "../store/slices/userSlice.ts";
+import { logout, setShowHotelReg } from "../store/slices/userSlice.ts";
 import type { AppDispatch, RootState } from "../store/store.ts";
 
 export default function Navbar() {
@@ -101,14 +101,16 @@ export default function Navbar() {
               />
             </NavLink>
           ))}
-          <button
-            className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
-              isScrolled ? "text-black" : "text-white"
-            } transition-all`}
-            onClick={() => navigate("/owner")}
-          >
-            Dashboard
-          </button>
+          {/* {user && user.role === "hotelOwner" && (
+            <button
+              className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
+                isScrolled ? "text-black" : "text-white"
+              } transition-all`}
+              onClick={() => navigate("/owner")}
+            >
+              Dashboard
+            </button>
+          )} */}
         </div>
 
         {/* Desktop Right */}
@@ -164,14 +166,34 @@ export default function Navbar() {
                       setIsUserMenuOpen(false);
                       navigate("/profile");
                     }}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:border-r-4 hover:border-slate-500 cursor-pointer"
                   >
                     Go to profile
                   </button>
+                  {user && user.role === "hotelOwner" ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate("/owner")}
+                      className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-gray-100 hover:border-r-4 hover:border-slate-500 cursor-pointer"
+                    >
+                      Dashboard
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        dispatch(setShowHotelReg(true));
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-gray-100 hover:border-r-4 hover:border-slate-500 cursor-pointer"
+                    >
+                      Become Hotel Owner
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-gray-100 cursor-pointer"
+                    className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-100 hover:border-r-4 hover:border-violet-500 cursor-pointer"
                   >
                     Logout
                   </button>
@@ -243,7 +265,7 @@ export default function Navbar() {
           </div>
 
           <div className="mt-auto flex flex-col gap-3 px-6 pb-12">
-            {user ? (
+            {user && user.role === "hotelOwner" ? (
               <button
                 className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
                 onClick={() => navigate("/owner")}

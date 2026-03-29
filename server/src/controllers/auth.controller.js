@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import generateToken from "../utils/jwt.js";
 import { generateAvatar } from "../utils/generateAvatar.js";
 import { ENV } from "../config/env.js";
+import { OAuth2Client } from "google-auth-library";
 
 export const signup = async (req, res) => {
   try {
@@ -144,6 +145,18 @@ export const signout = async (req, res) => {
       });
   } catch (error) {
     console.log(error || "Internal Server Error");
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+export const signinWithGoogle = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error || "Internal Server Error");
+
     return res.status(500).json({
       success: false,
       message: error.message || "Internal Server Error",

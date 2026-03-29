@@ -1,11 +1,47 @@
+import { useDispatch, useSelector } from "react-redux";
 import { assets, cities } from "../assets/assets";
-
+import type { AppDispatch, RootState } from "../store/store";
+import {
+  getProfile,
+  registerHotel,
+  setShowHotelReg,
+} from "../store/slices/userSlice";
+import { useCallback, useState, type FormEvent } from "react";
+import type { HotelRegistrationPayload } from "../types";
+import { Loader2 } from "lucide-react";
 export default function HotelReg() {
+  const [formData, setFormData] = useState<HotelRegistrationPayload>({
+    name: "",
+    address: "",
+    contact: "",
+    city: "",
+  });
+
+  const { isHotelRegistering } = useSelector((state: RootState) => state.user);
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      dispatch(registerHotel(formData))
+        .unwrap()
+        .then(() => {
+          dispatch(setShowHotelReg(false));
+          dispatch(getProfile());
+        })
+        .catch(() => {
+          // allow retry, errors handled via toast
+        });
+    },
+    [formData, dispatch]
+  );
   return (
     <div className="fixed top-0 left-0 bottom-0 right-0 z-100 flex items-center justify-center bg-black/70">
       <form
         action=""
         className="flex bg-white rounded-xl max-w-4xl max-md:mx-2"
+        onSubmit={handleSubmit}
       >
         <img
           src={assets.regImage}
@@ -17,6 +53,7 @@ export default function HotelReg() {
             src={assets.closeIcon}
             alt="close-icon"
             className="absolute top-4 right-4 size-4 cursor-pointer"
+            onClick={() => dispatch(setShowHotelReg(false))}
           />
           <p className="text-2xl font-semibold">Register Your Hotel</p>
 
@@ -32,6 +69,10 @@ export default function HotelReg() {
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-500 font-light"
               required
               tabIndex={0}
+              value={formData.name}
+              onChange={(event) =>
+                setFormData({ ...formData, name: event.target.value })
+              }
             />
           </div>
           {/* Phone */}
@@ -46,6 +87,10 @@ export default function HotelReg() {
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-500 font-light"
               required
               tabIndex={0}
+              value={formData.contact}
+              onChange={(event) =>
+                setFormData({ ...formData, contact: event.target.value })
+              }
             />
           </div>
           {/* Address */}
@@ -60,6 +105,10 @@ export default function HotelReg() {
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-500 font-light"
               required
               tabIndex={0}
+              value={formData.address}
+              onChange={(event) =>
+                setFormData({ ...formData, address: event.target.value })
+              }
             />
           </div>
           <div className="w-full mt-4">
@@ -70,6 +119,10 @@ export default function HotelReg() {
               name="city"
               id="city"
               className="border border-gray-200 rounded w-full px-3 py-2.5 mt-1 outline-indigo-500 font-light"
+              value={formData.city}
+              onChange={(event) =>
+                setFormData({ ...formData, city: event.target.value })
+              }
             >
               <option value="">Select City</option>
               {cities.map((city: string, index: number) => (
@@ -79,8 +132,19 @@ export default function HotelReg() {
               ))}
             </select>
           </div>
-          <button className="bg-indigo-500 hover:bg-indigo-600 transition-all text-white mr-auto px-6 py-2 rounded cursor-pointer mt-6">
-            Register
+          <button
+            type="submit"
+            className="bg-indigo-500 hover:bg-indigo-600 transition-all text-white mr-auto px-6 py-2 rounded cursor-pointer mt-6"
+            disabled={isHotelRegistering}
+          >
+            {isHotelRegistering ? (
+              <p className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Registering...</span>
+              </p>
+            ) : (
+              <p>Register</p>
+            )}
           </button>
         </div>
       </form>

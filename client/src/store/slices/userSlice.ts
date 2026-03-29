@@ -9,6 +9,7 @@ import axiosInstance from "../../config/axiosConfig";
 import type {
   APIResponseNoData,
   APIResponseWithData,
+  HotelRegistrationPayload,
   LoginPayload,
   RegisterPayload,
   User,
@@ -21,6 +22,8 @@ interface UserState {
   isUserLoading: boolean;
   userError: string | null;
   authError: string | null;
+  showHotelReg: boolean;
+  isHotelRegistering: boolean;
 }
 
 const initialState: UserState = {
@@ -30,6 +33,8 @@ const initialState: UserState = {
   isUserLoading: false,
   userError: null,
   authError: null,
+  showHotelReg: false,
+  isHotelRegistering: false,
 };
 
 export const login = createAsyncThunk(
@@ -105,6 +110,30 @@ export const register = createAsyncThunk(
     }
   }
 );
+
+export const registerHotel = createAsyncThunk(
+  "hotel/register",
+  async (payload: HotelRegistrationPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post<APIResponseNoData>(
+        "/hotel",
+        payload
+      );
+      toast.success(response.data.message || "Hotel registered successfully");
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while registering hotel"
+      );
+      console.log(err.response?.data.message);
+      return rejectWithValue(
+        err.response?.data.message ||
+          "An error occurred while registering hotel"
+      );
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -112,6 +141,9 @@ const userSlice = createSlice({
     setUser: (state, action: PayloadAction<User | null>) => {
       state.user = action.payload;
       state.isAuthenticated = Boolean(action.payload);
+    },
+    setShowHotelReg: (state, action: PayloadAction<boolean>) => {
+      state.showHotelReg = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -172,8 +204,17 @@ const userSlice = createSlice({
       state.isAuthenticated = false;
       state.authError = "An error occurred while registering";
     });
+    builder.addCase(registerHotel.pending, (state) => {
+      state.isHotelRegistering = true;
+    });
+    builder.addCase(registerHotel.fulfilled, (state) => {
+      state.isHotelRegistering = false;
+    });
+    builder.addCase(registerHotel.rejected, (state) => {
+      state.isHotelRegistering = false;
+    });
   },
 });
 
-export const { setUser } = userSlice.actions;
+export const { setUser, setShowHotelReg } = userSlice.actions;
 export default userSlice.reducer;

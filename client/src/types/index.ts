@@ -3,7 +3,9 @@ export type User = {
   username: string;
   email: string;
   image: string;
-  role: string;
+  role: "user" | "admin" | "hotelOwner";
+  isVerified: boolean;
+  isBlocked: boolean;
   createdAt?: string;
   updatedAt?: string;
   __v: number;
@@ -102,4 +104,11 @@ export type APIResponseWithData<T> = {
 export type APIResponseNoData = {
   success: boolean;
   message: string;
+};
+
+export type HotelRegistrationPayload = {
+  name: string;
+  address: string;
+  contact: string;
+  city: string;
 };
