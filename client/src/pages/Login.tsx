@@ -1,17 +1,18 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import LoginForm, { type Credentials } from "../components/LoginForm";
+import LoginForm from "../components/LoginForm";
 import { login, getProfile } from "../store/slices/userSlice";
 import type { AppDispatch } from "../store/store";
+import type { LoginPayload } from "../types";
 
 export default function LoginPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const handleLogin = useCallback(
-    (credentials: Credentials) => {
-      dispatch(login(credentials))
+    (payload: LoginPayload) => {
+      dispatch(login(payload))
         .unwrap()
         .then(() => {
           dispatch(getProfile());
@@ -21,7 +22,7 @@ export default function LoginPage() {
           // keep on page for retry; errors shown via toast from thunk
         });
     },
-    [dispatch, navigate],
+    [dispatch, navigate]
   );
 
   const switchToRegister = useCallback(() => {

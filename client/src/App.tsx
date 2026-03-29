@@ -12,6 +12,7 @@ import LoginPage from "./pages/Login";
 import MyBookings from "./pages/MyBookings";
 import RegisterPage from "./pages/Register";
 import RoomDetail from "./pages/RoomDetail";
+import ProfilePage from "./pages/Profile";
 import { getProfile } from "./store/slices/userSlice";
 import type { AppDispatch, RootState } from "./store/store";
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/rooms" element={<AllRooms />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

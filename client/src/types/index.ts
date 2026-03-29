@@ -4,7 +4,7 @@ export type User = {
   email: string;
   image: string;
   role: string;
-  cretaedAt?: string;
+  createdAt?: string;
   updatedAt?: string;
   __v: number;
   recentSearchedCities: string[];
