@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Title from "../../components/Title";
 import { assets } from "../../assets/assets";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store/store";
+import { addRoom } from "../../store/slices/hotelSlice";
+import { Loader2 } from "lucide-react";
 
 export default function AddRoom() {
   const [images, setImages] = useState<Record<string, File | null>>({
@@ -21,9 +25,45 @@ export default function AddRoom() {
       "Pool Access": false,
     },
   });
+  const { isRoomAdding } = useSelector((state: RootState) => state.hotel);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      dispatch(
+        addRoom({
+          roomType: inputs.roomType,
+          pricePerNight: inputs.priceperNight,
+          amenities: Object.keys(inputs.amenities).filter(
+            (key) => inputs.amenities[key as keyof typeof inputs.amenities]
+          ),
+          images: Object.values(images).filter((image) => image !== null),
+        })
+      );
+      setInputs({
+        roomType: "",
+        priceperNight: 0,
+        amenities: {
+          "Free Wifi": false,
+          "Free Breakfast": false,
+          "Room Service": false,
+          "Mountain View": false,
+          "Pool Access": false,
+        },
+      });
+      setImages({
+        "1": null,
+        "2": null,
+        "3": null,
+        "4": null,
+      });
+    },
+    [dispatch, inputs, images]
+  );
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <Title
         align="left"
         font="outfit"
@@ -121,8 +161,18 @@ export default function AddRoom() {
         ))}
       </div>
 
-      <button className="bg-primary text-white px-8 py-2 rounded mt-8 cursor-pointer">
-        Add Room
+      <button
+        className="bg-primary text-white px-8 py-2 rounded mt-8 cursor-pointer"
+        disabled={isRoomAdding}
+      >
+        {isRoomAdding ? (
+          <p className="flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Adding Room...</span>
+          </p>
+        ) : (
+          <p>Add Room</p>
+        )}
       </button>
     </form>
   );

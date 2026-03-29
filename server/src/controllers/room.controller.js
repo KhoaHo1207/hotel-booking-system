@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from "cloudinary";
 import Hotel from "../models/Hotel.model.js";
 import Room from "../models/Room.model.js";
+import fs from "fs";
+import mongoose from "mongoose";
 
 export const createRoom = async (req, res) => {
   try {
@@ -97,7 +99,6 @@ export const createRoom = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Room created successfully",
-      data: newRoom,
     });
   } catch (error) {
     console.log(error);
@@ -293,9 +294,11 @@ export const toggleRoomAvailability = async (req, res) => {
       });
     }
 
+    const hotel = await Hotel.findOne({ owner });
+
     const room = await Room.findOne({
       _id: id,
-      hotel: owner,
+      hotel: hotel._id,
     });
 
     if (!room) {

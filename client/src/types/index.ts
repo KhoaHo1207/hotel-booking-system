@@ -112,3 +112,10 @@ export type HotelRegistrationPayload = {
   contact: string;
   city: string;
 };
+
+export type AddRoomPayload = {
+  roomType: string;
+  pricePerNight: number;
+  amenities: string[];
+  images: File[];
+};

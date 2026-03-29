@@ -1,10 +1,41 @@
-import { useState } from "react";
-import type { Room } from "../../types";
-import { roomsDummyData } from "../../assets/assets";
+import { useCallback, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import RoomLoading from "../../components/Loading/RoomLoading";
 import Title from "../../components/Title";
+import {
+  getOwnerRooms,
+  toggleRoomAvailability,
+} from "../../store/slices/hotelSlice";
+import type { AppDispatch, RootState } from "../../store/store";
 
 export default function ListRoom() {
-  const [rooms, setRooms] = useState<Room[]>(roomsDummyData);
+  const { rooms, isRoomsLoading, isRoomAvailabilityToggling } = useSelector(
+    (state: RootState) => state.hotel
+  );
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleToggleRoomAvailability = useCallback(
+    (roomId: string) => {
+      dispatch(toggleRoomAvailability(roomId))
+        .unwrap()
+        .then(() => {
+          dispatch(getOwnerRooms()).unwrap();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    dispatch(getOwnerRooms()).unwrap();
+  }, [dispatch]);
+
+  if (isRoomsLoading || isRoomAvailabilityToggling) {
+    return <RoomLoading />;
+  }
   return (
     <div>
       <Title
@@ -48,6 +79,7 @@ export default function ListRoom() {
                   <label
                     htmlFor=""
                     className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3"
+                    onClick={() => handleToggleRoomAvailability(room._id)}
                   >
                     <input
                       type="checkbox"

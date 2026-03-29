@@ -19,7 +19,7 @@ const roomSchema = new mongoose.Schema(
       min: [0, "Price per night must be greater than 0"],
     },
     amenities: {
-      type: [String],
+      type: Array,
     },
     images: [
       {

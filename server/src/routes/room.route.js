@@ -3,7 +3,7 @@ import { isAuthenticated } from "../middlewares/checkAuth.js";
 import {
   createRoom,
   getRooms,
-  getRoom,
+  getOwnerRooms,
   deleteRoom,
   updateRoom,
   toggleRoomAvailability,
@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.post("/", upload.array("images", 4), isAuthenticated, createRoom);
 router.get("/", getRooms);
-router.get("/:id", getRoom);
+router.get("/owner", isAuthenticated, getOwnerRooms);
 router.delete("/:id", isAuthenticated, deleteRoom);
 router.patch("/:id", isAuthenticated, updateRoom);
 router.patch(
