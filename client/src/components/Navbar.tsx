@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets.ts";
 import { logout } from "../store/slices/userSlice.ts";
 import type { AppDispatch, RootState } from "../store/store.ts";
@@ -9,8 +9,8 @@ export default function Navbar() {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Hotels", path: "/rooms" },
-    { name: "Experiences", path: "/experiences" },
-    { name: "Contact", path: "/contact" },
+    // { name: "Experiences", path: "/" },
+    // { name: "Contact", path: "/" },
   ];
 
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -25,6 +25,7 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const pathname = useLocation().pathname;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,20 +86,20 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-4 lg:gap-8">
           {navLinks.map((link, i) => (
-            <a
+            <NavLink
               key={i}
-              href={link.path}
+              to={link.path}
               className={`group flex flex-col gap-0.5 ${
                 isScrolled ? "text-gray-700" : "text-white"
               }`}
             >
               {link.name}
               <div
-                className={`${
-                  isScrolled ? "bg-gray-700" : "bg-white"
-                } h-0.5 w-0 group-hover:w-full transition-all duration-300`}
+                className={`${isScrolled ? "bg-gray-700" : "bg-white"} h-0.5 ${
+                  navLinks[i].path === pathname ? "w-full" : "w-0"
+                } group-hover:w-full transition-all duration-300`}
               />
-            </a>
+            </NavLink>
           ))}
           <button
             className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${
@@ -122,7 +123,7 @@ export default function Navbar() {
           {user ? (
             <div ref={menuRef} className="relative flex items-center gap-3">
               <button
-                className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20 cursor-pointer"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
                 type="button"
               >
@@ -148,7 +149,7 @@ export default function Navbar() {
                 >
                   <path
                     d="M1 1l4 4 4-4"
-                    stroke="currentColor"
+                    stroke={isScrolled ? "black" : "white"}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                   />
@@ -163,14 +164,14 @@ export default function Navbar() {
                       setIsUserMenuOpen(false);
                       navigate("/profile");
                     }}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 cursor-pointer"
                   >
                     Go to profile
                   </button>
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-gray-100 cursor-pointer"
                   >
                     Logout
                   </button>
@@ -192,14 +193,6 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
 
         <div className="flex items-center gap-3 lg:hidden">
-          {user && (
-            <button
-              className="px-3 py-2 text-sm font-semibold text-slate-900 transition hover:text-slate-700"
-              onClick={() => navigate("/my-bookings")}
-            >
-              My bookings
-            </button>
-          )}
           <img
             src={assets.menuIcon}
             alt="menu_icon"
@@ -210,44 +203,62 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         <div
-          className={`fixed top-0 left-0 w-full h-screen bg-white text-base flex flex-col lg:hidden items-center justify-center gap-6 font-medium text-gray-800 transition-all duration-500 ${
+          className={`fixed top-0 left-0 w-full h-screen bg-white/95 text-base lg:hidden flex flex-col transition-all duration-500 ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <button
-            className="absolute top-4 right-4"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <img
-              src={assets.closeIcon}
-              alt="close_icon"
-              className="h-6.5 cursor-pointer"
-            />
-          </button>
-
-          {navLinks.map((link, i) => (
-            <a key={i} href={link.path} onClick={() => setIsMenuOpen(false)}>
-              {link.name}
-            </a>
-          ))}
-
-          {user && (
+          <div className="flex items-center justify-between px-6 py-5">
+            <img src={assets.logo} alt="logo" className="h-8" />
             <button
-              className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all"
-              onClick={() => navigate("/owner")}
+              className="rounded-full border border-slate-200 bg-white p-1 shadow-sm"
+              onClick={() => setIsMenuOpen(false)}
             >
-              Dashboard
+              <img
+                src={assets.closeIcon}
+                alt="close icon"
+                className="h-5 w-5"
+              />
             </button>
-          )}
+          </div>
+          <div className="flex items-center gap-3 px-6 mx-auto justify-center">
+            {user && (
+              <img
+                src={user.image || assets.userIcon}
+                alt="user avatar"
+                className="h-6 w-6 rounded-full object-cover"
+              />
+            )}
+          </div>
+          <div className="flex flex-col gap-4 px-6 pt-4 font-semibold text-slate-700">
+            {navLinks.map((link, i) => (
+              <a
+                key={i}
+                href={link.path}
+                onClick={() => setIsMenuOpen(false)}
+                className="rounded-2xl border border-slate-200 py-3 text-center transition hover:border-slate-400 hover:text-slate-900"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
 
-          {!user && (
-            <button
-              className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </button>
-          )}
+          <div className="mt-auto flex flex-col gap-3 px-6 pb-12">
+            {user ? (
+              <button
+                className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+                onClick={() => navigate("/owner")}
+              >
+                Dashboard
+              </button>
+            ) : (
+              <button
+                className="rounded-2xl bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+            )}
+          </div>
         </div>
       </nav>
     </>
