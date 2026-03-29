@@ -1,24 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets.ts";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState, AppDispatch } from "../store/store.ts";
-import { login, getProfile } from "../store/slices/userSlice.ts";
-import LoginPopup from "./LoginPopup.tsx";
+import { logout } from "../store/slices/userSlice.ts";
+import type { AppDispatch, RootState } from "../store/store.ts";
 
 export default function Navbar() {
   const navLinks = [
     { name: "Home", path: "/" },
-    { name: "Hotles", path: "/rooms" },
+    { name: "Hotels", path: "/rooms" },
     { name: "Experiences", path: "/experiences" },
     { name: "Contact", path: "/contact" },
   ];
 
-  const ref = useRef<HTMLDivElement | null>(null);
+  const navRef = useRef<HTMLDivElement | null>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const { user } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch<AppDispatch>();
@@ -44,20 +44,24 @@ export default function Navbar() {
     };
   }, [location.pathname]);
 
-  const handleLoginSubmit = (credentials: {
-    email: string;
-    password: string;
-  }) => {
-    dispatch(login(credentials))
-      .unwrap()
-      .then(() => {
-        dispatch(getProfile());
-        setIsLoginOpen(false);
-      })
-      .catch(() => {
-        // keep modal open for retry
-      });
+  const handleLogout = () => {
+    dispatch(logout());
+    setIsUserMenuOpen(false);
+    navigate("/");
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -67,7 +71,7 @@ export default function Navbar() {
             ? "bg-white/80 shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4"
             : "py-4 md:py-6"
         }`}
-        ref={ref}
+        ref={navRef}
       >
         {/* Logo */}
         <Link to="/">
@@ -116,27 +120,69 @@ export default function Navbar() {
             } h-7 transition-all duration-300`}
           />
           {user ? (
-            <div className="flex items-center gap-3">
+            <div ref={menuRef} className="relative flex items-center gap-3">
               <button
                 className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-                onClick={() => navigate("/my-bookings")}
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                type="button"
               >
                 <img
                   src={user.image || assets.userIcon}
                   alt="user avatar"
                   className="h-6 w-6 rounded-full object-cover"
                 />
-                <span className="hidden text-white lg:inline">
+                <span
+                  className={`hidden lg:inline ${
+                    isScrolled ? "text-gray-700" : "text-white"
+                  }`}
+                >
                   {user.username}
                 </span>
+                <svg
+                  className={`h-3 w-3 transition ${
+                    isUserMenuOpen ? "rotate-180" : ""
+                  }`}
+                  viewBox="0 0 10 6"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M1 1l4 4 4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full mt-3 w-48 rounded-2xl border border-slate-100 bg-white p-2 shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate("/profile");
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Go to profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <button
-              className={`px-8 py-2.5 rounded-full ml-4 transition-all duration-500 ${
+              className={`px-8 py-2.5 rounded-full ml-4 transition-all duration-500 cursor-pointer ${
                 isScrolled ? "text-white bg-black" : "bg-white text-black"
               }`}
-              onClick={() => setIsLoginOpen(true)}
+              onClick={() => navigate("/login")}
             >
               Login
             </button>
@@ -196,19 +242,14 @@ export default function Navbar() {
 
           {!user && (
             <button
-              className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500"
-              onClick={() => setIsLoginOpen(true)}
+              className="bg-black text-white px-8 py-2.5 rounded-full transition-all duration-500 cursor-pointer"
+              onClick={() => navigate("/login")}
             >
               Login
             </button>
           )}
         </div>
       </nav>
-      <LoginPopup
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSubmit={handleLoginSubmit}
-      />
     </>
   );
 }

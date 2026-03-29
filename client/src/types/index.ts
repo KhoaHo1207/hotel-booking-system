@@ -87,8 +87,19 @@ export type LoginPayload = {
   password: string;
 };
 
-export type APIResponse<T> = {
+export type RegisterPayload = {
+  email: string;
+  password: string;
+  username: string;
+};
+
+export type APIResponseWithData<T> = {
   success: boolean;
   message: string;
   data: T;
+};
+
+export type APIResponseNoData = {
+  success: boolean;
+  message: string;
 };
