@@ -26,80 +26,83 @@ export default function MyBookings() {
       </div>
 
       {bookings.length > 0 &&
-        bookings.map((booking: Booking, index: number) => (
-          <div
-            key={index}
-            className="grid grid-cols-1 md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 py-6 first:border-t"
-          >
-            {/* Hotel Details */}
-            <div className="flex flex-col md:flex-row">
-              <img
-                src={booking.room.images[0]}
-                alt="hotel-image"
-                className="md:w-44 rounded shadow object-cover"
-              />
-              <div className="flex flex-col gap-1.5 max-md:mt-3 md:ml-4">
-                <p className="font-playfair text-2xl">
-                  {booking.hotel.name}
-                  <span className="font-inter text-sm">
-                    ({booking.room.roomType})
-                  </span>
-                </p>
-
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <img src={assets.locationIcon} alt="" />
-                  <span>{booking.hotel.address}</span>
-                </div>
-
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <img src={assets.guestsIcon} alt="" />
-                  <span>{booking.guests} guests</span>
-                </div>
-
-                <p className="text-base">Total: ${booking.totalPrice}</p>
-              </div>
-            </div>
-            {/* Date & Time */}
-            <div className="flex flex-row md:items-center md:gap-12 mt-3 gap-8">
-              <div className="">
-                <p>Check-In:</p>
-                <p className="text-gray-500 text-sm">
-                  {new Date(booking.checkInDate).toDateString()}
-                </p>
-              </div>
-
-              <div>
-                <p>Check-Out:</p>
-                <p className="text-gray-500 text-sm">
-                  {new Date(booking.checkOutDate).toDateString()}
-                </p>
-              </div>
-            </div>
-            {/* Payment Status */}
-            <div className="flex flex-col items-start justify-center pt-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`size-3 rounded-full ${
-                    booking.isPaid ? "bg-green-500" : "bg-red-500"
-                  }`}
+        bookings.map((booking: Booking, index: number) => {
+          const bookingImage = booking.room.images?.[0]?.url;
+          return (
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-[3fr_2fr_1fr] w-full border-b border-gray-300 py-6 first:border-t"
+            >
+              {/* Hotel Details */}
+              <div className="flex flex-col md:flex-row">
+                <img
+                  src={bookingImage}
+                  alt="hotel-image"
+                  className="md:w-44 rounded shadow object-cover"
                 />
-                <p
-                  className={`text-sm ${
-                    booking.isPaid ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {booking.isPaid ? "Paid" : "Unpaid"}
-                </p>
-              </div>
+                <div className="flex flex-col gap-1.5 max-md:mt-3 md:ml-4">
+                  <p className="font-playfair text-2xl">
+                    {booking.hotel.name}
+                    <span className="font-inter text-sm">
+                      ({booking.room.roomType})
+                    </span>
+                  </p>
 
-              {!booking.isPaid && (
-                <button className="px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer">
-                  Pay Now
-                </button>
-              )}
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <img src={assets.locationIcon} alt="" />
+                    <span>{booking.hotel.address}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <img src={assets.guestsIcon} alt="" />
+                    <span>{booking.guests} guests</span>
+                  </div>
+
+                  <p className="text-base">Total: ${booking.totalPrice}</p>
+                </div>
+              </div>
+              {/* Date & Time */}
+              <div className="flex flex-row md:items-center md:gap-12 mt-3 gap-8">
+                <div className="">
+                  <p>Check-In:</p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(booking.checkInDate).toDateString()}
+                  </p>
+                </div>
+
+                <div>
+                  <p>Check-Out:</p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(booking.checkOutDate).toDateString()}
+                  </p>
+                </div>
+              </div>
+              {/* Payment Status */}
+              <div className="flex flex-col items-start justify-center pt-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`size-3 rounded-full ${
+                      booking.isPaid ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <p
+                    className={`text-sm ${
+                      booking.isPaid ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {booking.isPaid ? "Paid" : "Unpaid"}
+                  </p>
+                </div>
+
+                {!booking.isPaid && (
+                  <button className="px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer">
+                    Pay Now
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
     </div>
   );
 }

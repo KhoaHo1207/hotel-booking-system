@@ -23,7 +23,8 @@ export default function RoomDetail() {
     }
 
     setRoom(r);
-    setMainImage(r.images[0]);
+    const initialImage = r.images[0]?.url ?? "";
+    setMainImage(initialImage);
   }, []);
   return (
     room && (
@@ -63,12 +64,12 @@ export default function RoomDetail() {
             {room?.images.length > 1 &&
               room.images.map((image, index) => (
                 <img
-                  src={image}
+                  src={image.url}
                   alt={`Room Image`}
                   key={index}
-                  onClick={() => setMainImage(image)}
+                  onClick={() => setMainImage(image.url)}
                   className={`w-full rounded-xl shadow-md object-cover cursor-pointer ${
-                    mainImage === image && "outline-2 outline-orange-500"
+                    mainImage === image.url && "outline-2 outline-orange-500"
                   }`}
                 />
               ))}

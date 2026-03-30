@@ -1,12 +1,26 @@
-import { useState } from "react";
-import { assets, dashboardDummyData } from "../../assets/assets";
+import { useDispatch, useSelector } from "react-redux";
+import { assets } from "../../assets/assets";
 import Title from "../../components/Title";
-import type { DashboardData } from "../../types";
+import type { AppDispatch, RootState } from "../../store/store";
+import { getDashboardData } from "../../store/slices/dashboardSlice";
+import { useEffect } from "react";
+import DashboardLoading from "../../components/Loading/DashboardLoading";
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] =
-    useState<DashboardData>(dashboardDummyData);
+  const currency = import.meta.env.VITE_CURRENCY || "$";
+  const { dashboardData, isDashboardLoading } = useSelector(
+    (state: RootState) => state.dashboard
+  );
 
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(getDashboardData());
+  }, [dispatch]);
+
+  if (isDashboardLoading) {
+    return <DashboardLoading />;
+  }
   return (
     <div>
       <Title
@@ -41,7 +55,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:ml-4 font-medium">
             <p className="text-blue-500 text-lg">Total Revenue</p>
             <p className="text-neutral-400 text-base">
-              $ {dashboardData.totalRevenue}
+              {currency} {dashboardData.totalRevenue}
             </p>
           </div>
         </div>

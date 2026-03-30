@@ -9,9 +9,9 @@ import {
 import type { AppDispatch, RootState } from "../../store/store";
 
 export default function ListRoom() {
-  const { rooms, isRoomsLoading, isRoomAvailabilityToggling } = useSelector(
-    (state: RootState) => state.hotel
-  );
+  const currency = import.meta.env.VITE_CURRENCY || "$";
+  const { ownerRooms, isOwnerRoomsLoading, isRoomAvailabilityToggling } =
+    useSelector((state: RootState) => state.hotel);
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -33,7 +33,7 @@ export default function ListRoom() {
     dispatch(getOwnerRooms()).unwrap();
   }, [dispatch]);
 
-  if (isRoomsLoading || isRoomAvailabilityToggling) {
+  if (isOwnerRoomsLoading || isRoomAvailabilityToggling) {
     return <RoomLoading />;
   }
   return (
@@ -64,7 +64,7 @@ export default function ListRoom() {
             </tr>
           </thead>
           <tbody>
-            {rooms.map((room, index) => (
+            {ownerRooms.map((room, index) => (
               <tr key={index}>
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
                   {room.roomType}
@@ -73,7 +73,7 @@ export default function ListRoom() {
                   {room.amenities.join(", ")}
                 </td>
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
-                  {room.pricePerNight}
+                  {currency} {room.pricePerNight}
                 </td>
                 <td className="py-3 px-4 border-t border-gray-300 text-center">
                   <label

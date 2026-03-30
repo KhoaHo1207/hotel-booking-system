@@ -7,6 +7,8 @@ interface Props {
   index: number;
 }
 export default function HotelCard({ room, index }: Props) {
+  const currency = import.meta.env.VITE_CURRENCY || "$";
+  const coverImage = room.images?.[0]?.url;
   return (
     <Link
       to={`/rooms/${room._id}`}
@@ -14,9 +16,9 @@ export default function HotelCard({ room, index }: Props) {
       className="relative max-w-70 w-full rounded-xl overflow-hidden bg-white text-gray-500/90 shadow-[0px_4px_4px_rgba(0,0,0,0.05)]"
     >
       <img
-        src={room.images[0]}
+        src={coverImage}
         alt={`${room.roomType} at ${room.hotel.name}`}
-        className=""
+        className="w-full h-44 object-cover"
       />
       {index % 2 === 0 && (
         <p className="px-3 py-1 absolute top-3 left-3 text-xs bg-white text-gray-800 font-medium rounded-full">
@@ -40,7 +42,10 @@ export default function HotelCard({ room, index }: Props) {
 
         <div className="flex items-center justify-between mt-4">
           <p>
-            <span className="text-xl text-gray-800">${room.pricePerNight}</span>
+            <span className="text-xl text-gray-800">
+              {currency}
+              {room.pricePerNight}
+            </span>
             /night
           </p>
           <button className="px-4 py-2 text-sm font-medium border border-gray-300 rounded hover:bg-gray-50 transition-all cursor-pointer">

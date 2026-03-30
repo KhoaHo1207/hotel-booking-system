@@ -1,11 +1,16 @@
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { roomsDummyData } from "../assets/assets";
-import type { Room } from "../types";
+import type { RootState } from "../store/store";
 import HotelCard from "./HotelCard";
 import Title from "./Title";
+import FeaturedHotelLoading from "./Loading/FeaturedHotelLoading";
 
 export default function FeaturedDestination() {
   const navigate = useNavigate();
+
+  const { rooms, isRoomsLoading } = useSelector(
+    (state: RootState) => state.hotel
+  );
   return (
     <div className="flex flex-col items-center justify-center px-6 md:px-16 lg:px-24 bg-slate-50 py-20">
       <Title
@@ -15,9 +20,15 @@ export default function FeaturedDestination() {
         font="font-playfair"
       />
       <div className="flex flex-wrap items-center justify-center gap-6 mt-20">
-        {roomsDummyData.slice(0, 4).map((room: Room, index: number) => (
-          <HotelCard key={index} room={room} index={index} />
-        ))}
+        {isRoomsLoading ? (
+          <FeaturedHotelLoading />
+        ) : (
+          rooms
+            .slice(0, 4)
+            .map((room, index) => (
+              <HotelCard key={index} room={room} index={index} />
+            ))
+        )}
       </div>
 
       <button

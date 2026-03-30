@@ -9,10 +9,11 @@ interface Props {
 }
 
 export default function RoomCard({ room, onClick }: Props) {
+  const coverImage = room.images?.[0]?.url;
   return (
     <div className="flex flex-col md:flex-row items-start py-10 gap-6 border-b border-gray-300 last:pb-30 last:border-0">
       <img
-        src={room.images[0]}
+        src={coverImage}
         alt={room.hotel.name}
         title="View Room Details"
         className="max-h-65 md:w-1/2 rounded-xl shadow-lg object-cover cursor-pointer"
@@ -43,7 +44,7 @@ export default function RoomCard({ room, onClick }: Props) {
             >
               <img
                 src={facilityIcons[amenity as keyof typeof facilityIcons]}
-                alt={amenity}
+                alt=""
               />
               <p className="text-xs">{amenity}</p>
             </div>

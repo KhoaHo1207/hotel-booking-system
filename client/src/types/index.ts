@@ -24,13 +24,18 @@ export type Hotel = {
   __v?: number;
 };
 
+export type RoomImage = {
+  url: string;
+  public_id: string;
+};
+
 export type Room = {
   _id: string;
   hotel: Hotel;
   roomType: string;
   pricePerNight: number;
   amenities: string[];
-  images: string[];
+  images: RoomImage[];
   isAvailable: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -99,6 +104,17 @@ export type APIResponseWithData<T> = {
   success: boolean;
   message: string;
   data: T;
+  meta?: {
+    pagination?: {
+      page?: number;
+      limit?: number;
+      total?: number;
+      totalPages?: number;
+    };
+    stats?: {
+      totalRevenue?: number;
+    };
+  };
 };
 
 export type APIResponseNoData = {

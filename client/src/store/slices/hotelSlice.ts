@@ -12,20 +12,24 @@ import axiosInstance from "../../config/axiosConfig";
 
 interface HotelState {
   hotels: Hotel[];
-  isHotelsLoading: boolean;
+  ownerRooms: Room[];
   rooms: Room[];
-  isRoomsLoading: boolean;
+  isHotelsLoading: boolean;
+  isOwnerRoomsLoading: boolean;
   isRoomAdding: boolean;
   isRoomAvailabilityToggling: boolean;
+  isRoomsLoading: boolean;
 }
 
 const initialState: HotelState = {
   hotels: [],
-  isHotelsLoading: false,
+  ownerRooms: [],
   rooms: [],
-  isRoomsLoading: false,
+  isHotelsLoading: false,
+  isOwnerRoomsLoading: false,
   isRoomAdding: false,
   isRoomAvailabilityToggling: false,
+  isRoomsLoading: false,
 };
 
 export const addRoom = createAsyncThunk(
@@ -109,6 +113,29 @@ export const toggleRoomAvailability = createAsyncThunk(
     }
   }
 );
+
+export const getRooms = createAsyncThunk(
+  "room/getRooms",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<APIResponseWithData<Room[]>>(
+        "/room"
+      );
+      toast.success(response.data.message || "Rooms fetched successfully");
+      return response.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      console.log(err.response?.data.message);
+
+      toast.error(
+        err.response?.data.message || "An error occurred while getting rooms"
+      );
+      return rejectWithValue(
+        err.response?.data.message || "An error occurred while getting rooms"
+      );
+    }
+  }
+);
 const hotelSlice = createSlice({
   name: "hotel",
   initialState,
@@ -126,14 +153,14 @@ const hotelSlice = createSlice({
       state.isRoomAdding = false;
     });
     builder.addCase(getOwnerRooms.pending, (state) => {
-      state.isRoomsLoading = true;
+      state.isOwnerRoomsLoading = true;
     });
     builder.addCase(getOwnerRooms.fulfilled, (state, action) => {
-      state.isRoomsLoading = false;
-      state.rooms = action.payload.data || [];
+      state.isOwnerRoomsLoading = false;
+      state.ownerRooms = action.payload.data || [];
     });
     builder.addCase(getOwnerRooms.rejected, (state) => {
-      state.isRoomsLoading = false;
+      state.isOwnerRoomsLoading = false;
     });
     builder.addCase(toggleRoomAvailability.pending, (state) => {
       state.isRoomAvailabilityToggling = true;
@@ -143,6 +170,16 @@ const hotelSlice = createSlice({
     });
     builder.addCase(toggleRoomAvailability.rejected, (state) => {
       state.isRoomAvailabilityToggling = false;
+    });
+    builder.addCase(getRooms.pending, (state) => {
+      state.isRoomsLoading = true;
+    });
+    builder.addCase(getRooms.fulfilled, (state, action) => {
+      state.isRoomsLoading = false;
+      state.rooms = action.payload.data || [];
+    });
+    builder.addCase(getRooms.rejected, (state) => {
+      state.isRoomsLoading = false;
     });
   },
 });

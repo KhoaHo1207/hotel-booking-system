@@ -4,6 +4,8 @@ import RoomCard from "../components/RoomCard";
 import Title from "../components/Title";
 import type { Room } from "../types";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../store/store";
 
 const CheckBox = ({
   label,
@@ -57,8 +59,15 @@ const RadioButton = ({
 };
 
 export default function AllRooms() {
-  const navigate = useNavigate();
   const [openFilters, setOpenFilters] = useState<boolean>(false);
+  const [selectedFilters, setSelectedFilters] = useState<{
+    roomTypes: string[];
+    priceRanges: string[];
+  }>({
+    roomTypes: [],
+    priceRanges: [],
+  });
+  const [selectedSort, setSelectedSort] = useState<string>("");
 
   const roomTypes = ["Single Bed", "Double Bed", "Luxury Bed", "Family Bed"];
 
@@ -75,6 +84,57 @@ export default function AllRooms() {
     "Newest First",
   ];
 
+  const navigate = useNavigate();
+  const { rooms, isRoomsLoading } = useSelector(
+    (state: RootState) => state.hotel
+  );
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleFilterChange = (
+    checked: boolean,
+    value: string,
+    type: "roomTypes" | "priceRanges"
+  ) => {
+    setSelectedFilters(
+      (prevFilters: {
+        roomTypes: string[];
+        priceRanges: string[];
+      }): { roomTypes: string[]; priceRanges: string[] } => {
+        const updatedFilters = { ...prevFilters };
+        if (checked) {
+          updatedFilters[type].push(value);
+        } else {
+          updatedFilters[type] = updatedFilters[type].filter(
+            (filter) => filter !== value
+          );
+        }
+        return updatedFilters;
+      }
+    );
+  };
+
+  const handleSortChange = (sortOption: string) => {
+    setSelectedSort(sortOption);
+  };
+  //Function to check if the room matches the selected room types
+  const matchesRoomType = (room: Room) => {
+    return (
+      selectedFilters.roomTypes.length === 0 ||
+      selectedFilters.roomTypes.includes(room.roomType)
+    );
+  };
+  //Function to check if the room matches the selected price range
+  const matchesPriceChange = (room: Room) => {
+    return (
+      selectedFilters.priceRanges.length === 0 ||
+      selectedFilters.priceRanges.some((range) => {
+        const [min, max] = range.split(" to ").map(Number);
+        return room.pricePerNight >= min && room.pricePerNight <= max;
+      })
+    );
+  };
+
   return (
     <div className="flex flex-col-reverse lg:flex-row items-start justify-between pt-28 md:pt-36 px-4 md:px-16 lg:px-24 xl:px-32">
       {/* Rooms */}
@@ -87,10 +147,10 @@ export default function AllRooms() {
           />
         </div>
 
-        {roomsDummyData.map((room: Room, index: number) => (
+        {rooms.map((room, index) => (
           <RoomCard
             key={index}
-            room={room}
+            room={room as Room}
             onClick={() => {
               navigate(`/rooms/${room._id}`);
               window.scrollTo(0, 0);
