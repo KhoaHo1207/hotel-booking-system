@@ -238,7 +238,7 @@ export const getHotelBookings = async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate("room hotel"),
+        .populate("room hotel user"),
       Booking.countDocuments({ hotel: hotel._id }),
     ]);
 
