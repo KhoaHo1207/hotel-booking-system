@@ -12,12 +12,8 @@ connectCloudinary();
 const app = express();
 app.use(
   cors({
-    origin: [
-      ENV.FRONTEND_URL,
-      "https://hotel-booking-system-nine-amber.vercel.app",
-    ],
+    origin: "https://hotel-booking-system-nine-amber.vercel.app",
     credentials: true,
-    sameSite: "none",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
