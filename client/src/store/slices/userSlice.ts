@@ -9,6 +9,7 @@ import axiosInstance from "../../config/axiosConfig";
 import type {
   APIResponseNoData,
   APIResponseWithData,
+  Booking,
   HotelRegistrationPayload,
   LoginPayload,
   RegisterPayload,
@@ -26,6 +27,8 @@ interface UserState {
   showHotelReg: boolean;
   isHotelRegistering: boolean;
   recommendRooms: Room[] | null;
+  userBookings: Booking[] | null;
+  isUserBookingsLoading: boolean;
 }
 
 const initialState: UserState = {
@@ -38,6 +41,8 @@ const initialState: UserState = {
   showHotelReg: false,
   isHotelRegistering: false,
   recommendRooms: null,
+  userBookings: null,
+  isUserBookingsLoading: false,
 };
 
 export const login = createAsyncThunk(
@@ -222,6 +227,32 @@ export const checkAvailability = createAsyncThunk(
     }
   }
 );
+
+export const getUserBookings = createAsyncThunk(
+  "user/getUserBookings",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<APIResponseWithData<Booking[]>>(
+        "/booking/user"
+      );
+      toast.success(
+        response.data.message || "User bookings fetched successfully"
+      );
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      console.log(err.response?.data.message);
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while getting user bookings"
+      );
+      return rejectWithValue(
+        err.response?.data.message ||
+          "An error occurred while getting user bookings"
+      );
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -338,6 +369,16 @@ const userSlice = createSlice({
     builder.addCase(checkAvailability.rejected, (state) => {
       state.isUserLoading = false;
       state.userError = "An error occurred while checking availability";
+    });
+    builder.addCase(getUserBookings.pending, (state) => {
+      state.isUserBookingsLoading = true;
+    });
+    builder.addCase(getUserBookings.fulfilled, (state, action) => {
+      state.isUserBookingsLoading = false;
+      state.userBookings = action.payload;
+    });
+    builder.addCase(getUserBookings.rejected, (state) => {
+      state.isUserBookingsLoading = false;
     });
   },
 });

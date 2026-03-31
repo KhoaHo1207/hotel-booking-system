@@ -1,14 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { assets } from "../assets/assets";
 import Title from "../components/Title";
+import { getUserBookings } from "../store/slices/userSlice";
+import type { AppDispatch, RootState } from "../store/store";
 import type { Booking } from "../types";
-import { assets, userBookingsDummyData } from "../assets/assets";
+import MyBookingsLoading from "../components/Loading/MyBookingsLoading";
 
 export default function MyBookings() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { isUserBookingsLoading, userBookings } = useSelector(
+    (state: RootState) => state.user
+  );
 
   useEffect(() => {
-    setBookings(userBookingsDummyData as unknown as Booking[]);
-  }, []);
+    dispatch(getUserBookings());
+  }, [dispatch]);
+
+  if (isUserBookingsLoading) {
+    return <MyBookingsLoading />;
+  }
+
   return (
     <div className="py-28 md:pb-36 md:pt-32 px-4 md:px-16 lg:px-24 xl:px-32">
       <Title
@@ -25,8 +38,9 @@ export default function MyBookings() {
         </div>
       </div>
 
-      {bookings.length > 0 &&
-        bookings.map((booking: Booking, index: number) => {
+      {userBookings &&
+        userBookings.length > 0 &&
+        userBookings.map((booking: Booking, index: number) => {
           const bookingImage = booking.room.images?.[0]?.url;
           return (
             <div
