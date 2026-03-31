@@ -249,6 +249,29 @@ export const getUserBookings = createAsyncThunk(
     }
   }
 );
+
+export const stripePayment = createAsyncThunk(
+  "user/stripePayment",
+  async (bookingId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post<APIResponseWithData<string>>(
+        "/booking/stripe-payment",
+        { bookingId }
+      );
+      toast.success(response.data.message || "Payment made successfully");
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      console.log(err.response?.data.message);
+      toast.error(
+        err.response?.data.message || "An error occurred while making payment"
+      );
+      return rejectWithValue(
+        err.response?.data.message || "An error occurred while making payment"
+      );
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -375,6 +398,18 @@ const userSlice = createSlice({
     });
     builder.addCase(getUserBookings.rejected, (state) => {
       state.isUserBookingsLoading = false;
+    });
+    builder.addCase(stripePayment.pending, (state) => {
+      state.isUserLoading = true;
+      state.userError = null;
+    });
+    builder.addCase(stripePayment.fulfilled, (state) => {
+      state.isUserLoading = false;
+      state.userError = null;
+    });
+    builder.addCase(stripePayment.rejected, (state) => {
+      state.isUserLoading = false;
+      state.userError = "An error occurred while making payment";
     });
   },
 });

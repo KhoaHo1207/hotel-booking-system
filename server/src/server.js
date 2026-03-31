@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./database/connectDB.js";
 import initRoutes from "./routes/index.route.js";
 import connectCloudinary from "./config/cloudinray.js";
+import { stripeWebhooks } from "./utils/stripeWebhook.js";
 
 connectDB();
 connectCloudinary();
@@ -12,7 +13,10 @@ connectCloudinary();
 const app = express();
 app.use(
   cors({
-    origin: "https://hotel-booking-system-nine-amber.vercel.app",
+    origin: [
+      "https://hotel-booking-system-nine-amber.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -24,9 +28,13 @@ app.use(
     extended: true,
   })
 );
-
 app.use(cookieParser());
 
+app.post(
+  "/api/v1/stripe",
+  express.raw({ type: "application/json" }),
+  stripeWebhooks
+);
 initRoutes(app);
 
 app.get("/", (req, res) => {

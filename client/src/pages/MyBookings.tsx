@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { assets } from "../assets/assets";
 import Title from "../components/Title";
-import { getUserBookings } from "../store/slices/userSlice";
+import { getUserBookings, stripePayment } from "../store/slices/userSlice";
 import type { AppDispatch, RootState } from "../store/store";
 import type { Booking } from "../types";
 import MyBookingsLoading from "../components/Loading/MyBookingsLoading";
@@ -13,6 +13,14 @@ export default function MyBookings() {
   const { isUserBookingsLoading, userBookings } = useSelector(
     (state: RootState) => state.user
   );
+
+  const handleStripePayment = async (bookingId: string) => {
+    try {
+      await dispatch(stripePayment(bookingId)).unwrap();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     dispatch(getUserBookings());
@@ -109,7 +117,10 @@ export default function MyBookings() {
                 </div>
 
                 {!booking.isPaid && (
-                  <button className="px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer">
+                  <button
+                    className="px-4 py-1.5 mt-4 text-xs border border-gray-400 rounded-full hover:bg-gray-50 transition-all cursor-pointer"
+                    onClick={() => handleStripePayment(booking._id)}
+                  >
                     Pay Now
                   </button>
                 )}

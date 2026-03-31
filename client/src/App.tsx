@@ -15,6 +15,7 @@ import RoomDetail from "./pages/RoomDetail";
 import ProfilePage from "./pages/Profile";
 import { getProfile } from "./store/slices/userSlice";
 import type { AppDispatch, RootState } from "./store/store";
+import Loader from "./components/Loading/Loader";
 
 function App() {
   const { user } = useSelector((state: RootState) => state.user);
@@ -35,6 +36,7 @@ function App() {
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/loader/:nextUrl" element={<Loader />} />
         </Route>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
