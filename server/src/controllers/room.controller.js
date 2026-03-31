@@ -325,3 +325,45 @@ export const toggleRoomAvailability = async (req, res) => {
     });
   }
 };
+
+export const getRoomById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Room ID is required",
+      });
+    }
+
+    const room = await Room.findById(id).populate({
+      path: "hotel",
+      select: "name address city owner",
+      populate: {
+        path: "owner",
+        select: "username email image",
+      },
+    });
+
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Room fetched successfully",
+      data: room,
+    });
+  } catch (error) {
+    console.log(error || "Internal Server Error");
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};

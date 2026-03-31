@@ -7,6 +7,7 @@ import {
   deleteRoom,
   updateRoom,
   toggleRoomAvailability,
+  getRoomById,
 } from "../controllers/room.controller.js";
 import upload from "../middlewares/upload.js";
 const router = express.Router();
@@ -21,5 +22,6 @@ router.patch(
   isAuthenticated,
   toggleRoomAvailability
 );
+router.get("/:id", getRoomById);
 
 export default router;

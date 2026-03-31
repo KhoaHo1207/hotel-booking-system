@@ -1,6 +1,25 @@
+import { useState } from "react";
 import { assets, cities } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store/store";
+import { storeRecentSearchedCities } from "../store/slices/userSlice";
 
 export default function Hero() {
+  const [destination, setDestination] = useState<string>("");
+
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch<AppDispatch>();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    navigate(`/rooms?destination=${destination}`);
+    dispatch(storeRecentSearchedCities(destination))
+      .unwrap()
+      .catch(() => {
+        // allow retry, errors handled via toast
+      });
+  };
   return (
     <div className="flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 text-white bg-[url('src/assets/heroImage.png')] bg-no-repeat bg-cover bg-center h-screen">
       <p className="bg-[#49B9FF]/50 px-3.5 py-1 rounded-full mt-20">
@@ -15,7 +34,10 @@ export default function Hero() {
         hotels and resorts. Start your journey today.
       </p>
 
-      <form className="bg-white text-gray-500 rounded-lg px-6 py-4 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto mt-8">
+      <form
+        className="bg-white text-gray-500 rounded-lg px-6 py-4 flex flex-col md:flex-row max-md:items-start gap-4 max-md:mx-auto mt-8"
+        onSubmit={handleSubmit}
+      >
         <div>
           <div className="flex items-center gap-2">
             <img
@@ -32,6 +54,10 @@ export default function Hero() {
             className=" rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
             placeholder="Type here"
             required
+            value={destination}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setDestination(event.target.value)
+            }
           />
           <datalist id="destinations">
             {cities.map((city, index) => (

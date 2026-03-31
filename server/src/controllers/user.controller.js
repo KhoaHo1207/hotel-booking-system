@@ -1,4 +1,6 @@
 import User from "../models/User.model.js";
+import Room from "../models/Room.model.js";
+import Hotel from "../models/Hotel.model.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -107,6 +109,35 @@ export const getRecentSearchedCities = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+export const getRecommendRooms = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const recentSearchedCities = user.recentSearchedCities || [];
+
+    const hotels = await Hotel.find({
+      city: { $in: recentSearchedCities },
+    });
+
+    const recommendRooms = await Room.find({
+      hotel: { $in: hotels.map((hotel) => hotel._id) },
+    }).populate("hotel");
+
+    return res.status(200).json({
+      success: true,
+      message: "Recommend rooms fetched successfully",
+      data: recommendRooms,
+    });
+  } catch (error) {
+    console.log(error || "Internal Server Error");
 
     return res.status(500).json({
       success: false,

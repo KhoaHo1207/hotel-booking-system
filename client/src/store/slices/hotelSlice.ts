@@ -3,6 +3,7 @@ import type {
   AddRoomPayload,
   APIResponseNoData,
   APIResponseWithData,
+  BookingPayload,
   Hotel,
   Room,
 } from "../../types";
@@ -14,22 +15,28 @@ interface HotelState {
   hotels: Hotel[];
   ownerRooms: Room[];
   rooms: Room[];
+  roomDetail: Room | null;
   isHotelsLoading: boolean;
   isOwnerRoomsLoading: boolean;
   isRoomAdding: boolean;
   isRoomAvailabilityToggling: boolean;
   isRoomsLoading: boolean;
+  isRoomDetailLoading: boolean;
+  isBookingLoading: boolean;
 }
 
 const initialState: HotelState = {
   hotels: [],
   ownerRooms: [],
   rooms: [],
+  roomDetail: null,
   isHotelsLoading: false,
   isOwnerRoomsLoading: false,
   isRoomAdding: false,
   isRoomAvailabilityToggling: false,
   isRoomsLoading: false,
+  isRoomDetailLoading: false,
+  isBookingLoading: false,
 };
 
 export const addRoom = createAsyncThunk(
@@ -136,6 +143,55 @@ export const getRooms = createAsyncThunk(
     }
   }
 );
+
+export const getRoomDetail = createAsyncThunk(
+  "room/getRoomDetail",
+  async (roomId: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<APIResponseWithData<Room>>(
+        `/room/${roomId}`
+      );
+      toast.success(
+        response.data.message || "Room detail fetched successfully"
+      );
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      console.log(err.response?.data.message);
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while getting room detail"
+      );
+      return rejectWithValue(
+        err.response?.data.message ||
+          "An error occurred while getting room detail"
+      );
+    }
+  }
+);
+
+export const createBooking = createAsyncThunk(
+  "user/booking",
+  async (payload: BookingPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post<APIResponseNoData>(
+        "booking/book",
+        payload
+      );
+      toast.success(response.data.message || "Booking created successfully");
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+
+      console.log(err.response?.data.message);
+      toast.error(
+        err.response?.data.message || "An error occurred while creating booking"
+      );
+      return rejectWithValue(
+        err.response?.data.message || "An error occurred while creating booking"
+      );
+    }
+  }
+);
 const hotelSlice = createSlice({
   name: "hotel",
   initialState,
@@ -180,6 +236,25 @@ const hotelSlice = createSlice({
     });
     builder.addCase(getRooms.rejected, (state) => {
       state.isRoomsLoading = false;
+    });
+    builder.addCase(getRoomDetail.pending, (state) => {
+      state.isRoomDetailLoading = true;
+    });
+    builder.addCase(getRoomDetail.fulfilled, (state, action) => {
+      state.isRoomDetailLoading = false;
+      state.roomDetail = action.payload || null;
+    });
+    builder.addCase(getRoomDetail.rejected, (state) => {
+      state.isRoomDetailLoading = false;
+    });
+    builder.addCase(createBooking.pending, (state) => {
+      state.isBookingLoading = true;
+    });
+    builder.addCase(createBooking.fulfilled, (state) => {
+      state.isBookingLoading = false;
+    });
+    builder.addCase(createBooking.rejected, (state) => {
+      state.isBookingLoading = false;
     });
   },
 });

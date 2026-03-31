@@ -135,3 +135,10 @@ export type AddRoomPayload = {
   amenities: string[];
   images: File[];
 };
+
+export type BookingPayload = {
+  room: string;
+  checkInDate: string;
+  checkOutDate: string;
+  guests: number;
+};

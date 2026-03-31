@@ -1,29 +1,38 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import type { RootState } from "../store/store";
 import HotelCard from "./HotelCard";
 import Title from "./Title";
 import FeaturedHotelLoading from "./Loading/FeaturedHotelLoading";
-
-export default function FeaturedDestination() {
+import { useEffect } from "react";
+import { getRecommendRooms } from "../store/slices/userSlice";
+import type { AppDispatch } from "../store/store";
+export default function RecommendHotel() {
   const navigate = useNavigate();
 
-  const { rooms, isRoomsLoading } = useSelector(
-    (state: RootState) => state.hotel
+  const dispatch = useDispatch<AppDispatch>();
+  const { recommendRooms, isUserLoading } = useSelector(
+    (state: RootState) => state.user
   );
+
+  useEffect(() => {
+    dispatch(getRecommendRooms());
+  }, [dispatch]);
+
   return (
-    <div className="flex flex-col items-center justify-center px-6 md:px-16 lg:px-24 bg-slate-50 py-20">
+    <div className="flex flex-col items-center justify-center px-6 md:px-16 lg:px-24 py-20">
       <Title
-        title="Featured Destination"
+        title="Recommend Hotel Rooms"
         subTitle="Discover our handpicked selection of exceptional properties around the world, offering unparalleled luxury and unforgettable experiences."
         align="center"
         font="font-playfair"
       />
       <div className="flex flex-wrap items-center justify-center gap-6 mt-20 w-full">
-        {isRoomsLoading ? (
+        {isUserLoading ? (
           <FeaturedHotelLoading />
         ) : (
-          rooms
+          recommendRooms
+            ?.slice(0, 4)
             .slice(0, 4)
             .map((room, index) => (
               <HotelCard key={index} room={room} index={index} />

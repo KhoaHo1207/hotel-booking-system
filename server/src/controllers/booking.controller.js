@@ -10,7 +10,7 @@ export const checkAvailability = async ({
     const bookings = await Booking.find({
       room,
       checkInDate: { $lte: checkOutDate },
-      checKOutDate: { $gte: checkInDate },
+      checkOutDate: { $gte: checkInDate },
     });
 
     const isAvailable = bookings.length === 0;
@@ -42,7 +42,7 @@ export const checkAvailabilityAPI = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Room is available",
+      message: isAvailable ? "Room is available" : "Room is not available",
       data: isAvailable,
     });
   } catch (error) {
@@ -97,8 +97,16 @@ export const createBooking = async (req, res) => {
 
     let totalPrice = roomData.pricePerNight;
 
-    const checkIn = new date(checkInDate);
+    const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
+
+    if (checkIn > checkOut) {
+      return res.status(400).json({
+        success: false,
+        message: "Check-out date must be after check-in date",
+      });
+    }
+
     const timeDiff = checkOut.getTime() - checkIn.getTime();
     const nights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 

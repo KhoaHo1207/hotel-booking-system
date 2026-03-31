@@ -1,31 +1,110 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import type { Room, RoomCommon } from "../types";
-import {
-  assets,
-  facilityIcons,
-  roomCommonData,
-  roomsDummyData,
-} from "../assets/assets";
+import { assets, facilityIcons, roomCommonData } from "../assets/assets";
 import StarRating from "../components/StarRating";
+import { createBooking, getRoomDetail } from "../store/slices/hotelSlice";
+import { checkAvailability } from "../store/slices/userSlice";
+import type { AppDispatch, RootState } from "../store/store";
+import type { Room, RoomCommon } from "../types";
 import { getRandomRating } from "../utils/helper";
+import RoomDetailLoading from "../components/Loading/RoomDetailLoading";
+import toast from "react-hot-toast";
 
 export default function RoomDetail() {
-  const { id } = useParams<{ id: string }>();
   const [room, setRoom] = useState<Room | null>(null);
   const [mainImage, setMainImage] = useState<string | null>(null);
+  const [formData, setFormDate] = useState<{
+    checkInDate: string;
+    checkOutDate: string;
+    guests: number;
+  }>({
+    checkInDate: "",
+    checkOutDate: "",
+    guests: 1,
+  });
+  const [isAvailable, setIsAvailable] = useState<boolean>(false);
 
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  useEffect(() => {
-    const r = roomsDummyData.find((room) => room._id === id);
-    if (!r) {
-      return navigate("/rooms");
+  const dispatch = useDispatch<AppDispatch>();
+  const { isRoomDetailLoading, isBookingLoading } = useSelector(
+    (state: RootState) => state.hotel
+  );
+  const handleCheckAvailability = async () => {
+    if (!room) {
+      toast.error("Room details are still loading");
+      return;
     }
 
-    setRoom(r);
-    const initialImage = r.images[0]?.url ?? "";
-    setMainImage(initialImage);
-  }, []);
+    if (!formData.checkInDate || !formData.checkOutDate) {
+      toast.error("Please select both check-in and check-out dates");
+      return;
+    }
+
+    if (formData.checkInDate >= formData.checkOutDate) {
+      toast.error("Check-In Date must be less than Check-Out Date");
+      return;
+    }
+
+    try {
+      const isAvailable = await dispatch(
+        checkAvailability({
+          room: room._id,
+          checkInDate: formData.checkInDate,
+          checkOutDate: formData.checkOutDate,
+        })
+      ).unwrap();
+
+      setIsAvailable(isAvailable);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!isAvailable) {
+      await handleCheckAvailability();
+      return;
+    }
+    try {
+      await dispatch(
+        createBooking({
+          room: room?._id as string,
+          checkInDate: formData.checkInDate,
+          checkOutDate: formData.checkOutDate,
+          guests: formData.guests,
+        })
+      ).unwrap();
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      navigate("/my-bookings");
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(formData);
+  };
+
+  useEffect(() => {
+    dispatch(getRoomDetail(id as string))
+      .unwrap()
+      .catch(() => {
+        // allow retry, errors handled via toast
+      })
+      .then((room) => {
+        setRoom(room as Room);
+        const initialImage = (room as Room).images[0]?.url ?? "";
+        setMainImage(initialImage);
+      });
+  }, [dispatch, id]);
+
+  if (isRoomDetailLoading) {
+    return <RoomDetailLoading />;
+  }
+
   return (
     room && (
       <div className="py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
@@ -106,6 +185,7 @@ export default function RoomDetail() {
         <form
           action=""
           className="flex flex-col md:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl"
+          onSubmit={handleSubmit}
         >
           <div className="flex flex-col">
             <label htmlFor="checkInDate" className="font-medium">
@@ -118,6 +198,11 @@ export default function RoomDetail() {
               className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none"
               required
               aria-label="Check In Date"
+              value={formData.checkInDate}
+              onChange={(e) =>
+                setFormDate({ ...formData, checkInDate: e.target.value })
+              }
+              min={new Date().toISOString().split("T")[0]}
             />
           </div>
 
@@ -134,6 +219,11 @@ export default function RoomDetail() {
               className="w-full rounded border border-gray-300 px-3 py-2 mt-1.5 outline-none"
               required
               aria-label="Check Out Date"
+              value={formData.checkOutDate}
+              onChange={(e) =>
+                setFormDate({ ...formData, checkOutDate: e.target.value })
+              }
+              min={formData.checkInDate}
             />
           </div>
 
@@ -151,14 +241,23 @@ export default function RoomDetail() {
               required
               aria-label="Guests"
               min={1}
+              value={formData.guests}
+              onChange={(e) =>
+                setFormDate({ ...formData, guests: Number(e.target.value) })
+              }
             />
           </div>
 
           <button
             type="submit"
             className="bg-primary hover:bg-primary-dull active:scale-95 transition-all text-white rounded-md max-md:w-full max-md:mt-6 md:px-15 py-23 md:py-4 text-base cursor-pointer"
+            disabled={isBookingLoading}
           >
-            Check Availability
+            {isBookingLoading
+              ? "Booking..."
+              : isAvailable
+              ? "Book Now"
+              : "Check Availability"}
           </button>
         </form>
 

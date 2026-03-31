@@ -4,6 +4,7 @@ import {
   getUsers,
   storeRecentSearchedCities,
   getRecentSearchedCities,
+  getRecommendRooms,
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middlewares/checkAuth.js";
 const router = express.Router();
@@ -16,4 +17,5 @@ router.post(
   storeRecentSearchedCities
 );
 router.get("/recent-searched-cities", isAuthenticated, getRecentSearchedCities);
+router.get("/recommend-rooms", isAuthenticated, getRecommendRooms);
 export default router;

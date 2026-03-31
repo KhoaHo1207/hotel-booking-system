@@ -12,6 +12,7 @@ import type {
   HotelRegistrationPayload,
   LoginPayload,
   RegisterPayload,
+  Room,
   User,
 } from "../../types/index";
 
@@ -24,6 +25,7 @@ interface UserState {
   authError: string | null;
   showHotelReg: boolean;
   isHotelRegistering: boolean;
+  recommendRooms: Room[] | null;
 }
 
 const initialState: UserState = {
@@ -35,6 +37,7 @@ const initialState: UserState = {
   authError: null,
   showHotelReg: false,
   isHotelRegistering: false,
+  recommendRooms: null,
 };
 
 export const login = createAsyncThunk(
@@ -134,6 +137,91 @@ export const registerHotel = createAsyncThunk(
     }
   }
 );
+
+export const storeRecentSearchedCities = createAsyncThunk(
+  "user/storeRecentSearchedCities",
+  async (recentSearchedCity: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post<APIResponseNoData>(
+        "/user/store-recent-searched-cities",
+        { recentSearchedCity }
+      );
+      toast.success(response.data.message || "City searched successfully");
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(
+        err.response?.data.message || "An error occurred while searching city"
+      );
+      console.log(err.response?.data.message);
+      return rejectWithValue(
+        err.response?.data.message || "An error occurred while searching city"
+      );
+    }
+  }
+);
+
+export const getRecommendRooms = createAsyncThunk(
+  "user/getRecommendRooms",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<APIResponseWithData<Room[]>>(
+        "/user/recommend-rooms"
+      );
+      toast.success(
+        response.data.message || "Recommend rooms fetched successfully"
+      );
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while getting recommend rooms"
+      );
+      console.log(err.response?.data.message);
+
+      return rejectWithValue(
+        err.response?.data.message ||
+          "An error occurred while getting recommend rooms"
+      );
+    }
+  }
+);
+
+export const checkAvailability = createAsyncThunk(
+  "user/checkAvailability",
+  async (
+    payload: {
+      room: Room["_id"];
+      checkInDate: string;
+      checkOutDate: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosInstance.post<APIResponseWithData<boolean>>(
+        "/booking/check-availability",
+        payload
+      );
+      toast.success(
+        response.data.message || response.data.data
+          ? "Room is available"
+          : "Room is not available"
+      );
+      return response.data.data;
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      console.log(err.response?.data.message);
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while checking availability"
+      );
+      return rejectWithValue(
+        err.response?.data.message ||
+          "An error occurred while checking availability"
+      );
+    }
+  }
+);
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -212,6 +300,44 @@ const userSlice = createSlice({
     });
     builder.addCase(registerHotel.rejected, (state) => {
       state.isHotelRegistering = false;
+    });
+    builder.addCase(storeRecentSearchedCities.pending, (state) => {
+      state.isUserLoading = true;
+      state.userError = null;
+    });
+    builder.addCase(storeRecentSearchedCities.fulfilled, (state) => {
+      state.isUserLoading = false;
+      state.userError = null;
+    });
+    builder.addCase(storeRecentSearchedCities.rejected, (state) => {
+      state.isUserLoading = false;
+      state.userError =
+        "An error occurred while storing recent searched cities";
+    });
+    builder.addCase(getRecommendRooms.pending, (state) => {
+      state.isUserLoading = true;
+      state.userError = null;
+    });
+    builder.addCase(getRecommendRooms.fulfilled, (state, action) => {
+      state.isUserLoading = false;
+      state.userError = null;
+      state.recommendRooms = action.payload;
+    });
+    builder.addCase(getRecommendRooms.rejected, (state) => {
+      state.isUserLoading = false;
+      state.userError = "An error occurred while getting recommend rooms";
+    });
+    builder.addCase(checkAvailability.pending, (state) => {
+      state.isUserLoading = true;
+      state.userError = null;
+    });
+    builder.addCase(checkAvailability.fulfilled, (state) => {
+      state.isUserLoading = false;
+      state.userError = null;
+    });
+    builder.addCase(checkAvailability.rejected, (state) => {
+      state.isUserLoading = false;
+      state.userError = "An error occurred while checking availability";
     });
   },
 });

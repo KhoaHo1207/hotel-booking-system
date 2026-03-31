@@ -1,10 +1,10 @@
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import RoomCard from "../components/RoomCard";
 import Title from "../components/Title";
+import type { RootState } from "../store/store";
 import type { Room } from "../types";
-import { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../store/store";
 
 const CheckBox = ({
   label,
@@ -17,11 +17,13 @@ const CheckBox = ({
 }) => {
   return (
     <label
-      htmlFor=""
+      htmlFor={label}
       className="flex gap-3 items-center cursor-pointer mt-2 text-sm"
     >
       <input
         type="checkbox"
+        id={label}
+        name={label}
         checked={selected}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           onChange(e.target.checked, label)
@@ -43,11 +45,12 @@ const RadioButton = ({
 }) => {
   return (
     <label
-      htmlFor=""
+      htmlFor={label}
       className="flex gap-3 items-center cursor-pointer mt-2 text-sm"
     >
       <input
         type="radio"
+        id={label}
         name="sortOption"
         checked={selected}
         onChange={() => onChange(label)}
@@ -87,11 +90,7 @@ export default function AllRooms() {
   const currency = import.meta.env.VITE_CURRENCY || "$";
 
   const navigate = useNavigate();
-  const { rooms, isRoomsLoading } = useSelector(
-    (state: RootState) => state.hotel
-  );
-
-  const dispatch = useDispatch<AppDispatch>();
+  const { rooms } = useSelector((state: RootState) => state.hotel);
 
   const handleFilterChange = (
     checked: boolean,
