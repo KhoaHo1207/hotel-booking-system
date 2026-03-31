@@ -10,25 +10,25 @@ connectDB();
 connectCloudinary();
 
 const app = express();
-
+app.use(
+  cors({
+    origin: [
+      ENV.FRONTEND_URL,
+      "https://hotel-booking-system-nine-amber.vercel.app",
+    ],
+    credentials: true,
+    sameSite: "none",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
-app.use(
-  cors({
-    // origin: [
-    //   ENV.FRONTEND_URL || "https://hotel-booking-system-nine-amber.vercel.app",
-    // ],
 
-    origin: true,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 app.use(cookieParser());
 
 initRoutes(app);
