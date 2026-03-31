@@ -1,6 +1,9 @@
 import Booking from "../models/Booking.model.js";
 import Room from "../models/Room.model.js";
 import Hotel from "../models/Hotel.model.js";
+import transporter from "../config/nodemailer.js";
+import { ENV } from "../config/env.js";
+
 export const checkAvailability = async ({
   checkInDate,
   checkOutDate,
@@ -122,6 +125,33 @@ export const createBooking = async (req, res) => {
       totalPrice,
     });
 
+    const mailOptions = {
+      from: ENV.SENDER_EMAIL,
+      to: user.email,
+      subject: "Booking Confirmation",
+      html: `
+        <h2>Your Booking Details</h2>
+        <p>Dear: ${user.username}</p>
+        <p>Thank you for booking with us. Your booking details are as follows:</p>
+        <ul>
+        <li>Booking ID: ${booking._id}</li>
+          <li>Room: ${roomData.roomType}</li>
+          <li>Hotel: ${roomData.hotel.name}</li>
+          <li>Check-in Date: ${checkInDate}</li>
+          <li>Check-out Date: ${checkOutDate}</li>
+          <li>Guests: ${guestsNumber}</li>
+          <li>Payment Method: Pay At Hotel</li>
+          <li>Status: Pending</li>
+          <li>Created At: ${booking.createdAt}</li>
+          <li>Total Price: $ ${totalPrice}</li>
+        </ul>
+     
+        <p>Thank you for booking with us. We look forward to hosting you.</p>
+        <p>Best regards,</p>
+        <p>The QuickStay Team</p>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
     return res.status(201).json({
       success: true,
       message: "Booking created successfully",

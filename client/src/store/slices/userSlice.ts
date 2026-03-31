@@ -207,11 +207,7 @@ export const checkAvailability = createAsyncThunk(
         "/booking/check-availability",
         payload
       );
-      toast.success(
-        response.data.message || response.data.data
-          ? "Room is available"
-          : "Room is not available"
-      );
+      toast.success(response.data.message);
       return response.data.data;
     } catch (error) {
       const err = error as AxiosError<{ message: string }>;
