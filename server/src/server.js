@@ -19,7 +19,11 @@ app.use(
 );
 app.use(
   cors({
-    origin: [ENV.FROTNEND_URL || "http://localhost:5173"],
+    // origin: [
+    //   ENV.FRONTEND_URL || "https://hotel-booking-system-nine-amber.vercel.app",
+    // ],
+
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
